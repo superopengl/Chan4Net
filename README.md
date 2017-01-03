@@ -91,7 +91,7 @@ foreach(var item in chan.Yield()) {
 Console.WriteLine("Done");   // Outputs "Done"
 ```
 ## Code Samples
-Please read below code a psuedo code in C#. Some infinite loop and thread sleeping doesn't make sense in reality.
+Please read below code as C# psuedo code. Some infinite loops and thread sleepings don't make sense in reality.
 ### `Chan` as infinite message queue - slow producer and fast consumer
 ```csharp
 var chan = new Chan<int>(2);
