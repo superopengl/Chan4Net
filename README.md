@@ -1,9 +1,17 @@
-# Chan4Net
-Inspired by Golang/Go `chan` (https://tour.golang.org/concurrency/2), this is a C# implementation of the channel.
 
-## Performance of `Chan` vs .NET `BlockingCollection`
+
+# Chan4Net
+A simple C# implementation of Golang/Go `chan` (https://tour.golang.org/concurrency/2).
+
+## Installation
+NuGet package is avaiable via https://www.nuget.org/packages/Chan4Net.
+```
+Install-Package Chan4Net
+```
+
+## Performance
 The automated performance tests are included in the test project. You can run on you machine.
-`Chan` beats `BlockingCollection` on my local as below.
+`Chan4Net` beats `BlockingCollection` on my local as below.
 
 ![Performance Chan vs BlockingCollection](docs/Perf-ChanVsBlockingCollection.jpg)
 
