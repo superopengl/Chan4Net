@@ -1,5 +1,11 @@
 # Chan4Net
-Inspired by the concept of the `chan` in Golang/Go. This is an C# implementation of it. The APIs and usages designs are referred to Microsoft's `BlockingCollection` class.
+Inspired by Golang/Go `chan` (https://tour.golang.org/concurrency/2), this is a C# implementation of the channel.
+
+## Performance of `Chan` vs .NET `BlockingCollection`
+The automated performance tests are included in the test project. You can run on you machine.
+`Chan` beats `BlockingCollection` on my local as below.
+
+![Performance Chan vs BlockingCollection](docs/Perf-ChanVsBlockingCollection.jpg)
 
 ## APIs
 
@@ -53,7 +59,7 @@ chan.Close();
 
 chan.Send(2);  // Here throws InvalidOperationException, because one cannot send item into a closed channel.
 ```
-Taking item from a closed AND empty channel will throw exception. But it's still fine to Receive item from a closed channel if it isn't empty.
+Receiving item from a closed AND empty channel will throw exception.
 ```csharp
 var chan = new Chan<int>(2);
 chan.Send(1)
@@ -188,29 +194,4 @@ var subscriber2 = Task.Run(() => {
 });
 
 Task.WaitAll(publisher1, publisher2, subscriber1, subscriber2);
-```
-
-## Performance vs .NET `BlockingCollection`
-The automated performance tests are included in the test project. You can run on you machine.
-`Chan` beats `BlockingCollection` on my local as below.
-```
-Buffer size: 1, Total items: 100000, by running 10 times
-Chan: 
-    Average time: 74 ms (743029 ticks)
-BlockingCollection: 
-    Average time: 129 ms (1290903 ticks)
-
-
-Buffer size: 1000, Total items: 100000, by running 10 times
-Chan: 
-    Average time: 69 ms (695319 ticks)
-BlockingCollection: 
-    Average time: 94 ms (946921 ticks)
-
-
-Buffer size: 100000, Total items: 100000, by running 10 times
-Chan: 
-    Average time: 42 ms (429084 ticks)
-BlockingCollection: 
-    Average time: 72 ms (726481 ticks)
 ```
