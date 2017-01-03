@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Chan4Net</id>
+    <version>1.0.0</version>
+    <authors>jun.shao</authors>
+    <owners>jun.shao</owners>
+    <licenseUrl>https://github.com/superopengl/Chan4Net/blob/master/LICENSE</licenseUrl>
+    <projectUrl>https://github.com/superopengl/Chan4Net</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A simple .NET implementation of Golang/Go chan</description>
+    <releaseNotes>Supports unbuffered/buffered chan</releaseNotes>
+    <copyright>Copyright 2017</copyright>
+    <tags>chan channel bufferred unbufferred queue</tags>
+    <dependencies />
+  </metadata>
+  <files>
+	<file src="..\README.md" target="" />
+  </files>
+</package>
