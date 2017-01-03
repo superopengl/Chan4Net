@@ -22,7 +22,7 @@ The automated performance tests are included in the test project. You can run on
 // A buffered chan
 var bufferedChan = new Chan<int>(2); // Size must be >= 1 for a buffered channel.
 
-// A unbuffered chan
+// An unbuffered chan
 var unbufferedChan = new Chan<int>();
 ```
 
