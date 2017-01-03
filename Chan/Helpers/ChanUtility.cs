@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Chan.Helpers
+namespace Chan4Net.Helpers
 {
     internal static class ChanUtility
     {

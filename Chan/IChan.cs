@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 
-namespace Chan
+namespace Chan4Net
 {
     /// <summary>
     ///     Golang chan like implementation.

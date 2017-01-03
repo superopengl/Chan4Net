@@ -1,9 +1,9 @@
-﻿using Chan.BufferedChan;
-using Chan.UnbufferedChan;
+﻿using Chan4Net.BufferedChan;
+using Chan4Net.UnbufferedChan;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Chan
+namespace Chan4Net
 {
     /// <summary>
     ///     Golang chan like implementation.

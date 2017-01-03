@@ -1,10 +1,10 @@
-﻿using Chan.Helpers;
+﻿using Chan4Net.Helpers;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Chan.BufferedChan
+namespace Chan4Net.BufferedChan
 {
     internal class BufferedChan<T> : IChan<T>
     {

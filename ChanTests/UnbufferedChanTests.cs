@@ -4,9 +4,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Chan.UnbufferedChan;
+using Chan4Net.UnbufferedChan;
 
-namespace ChanTests
+namespace Chan4Net.Tests
 {
     [TestClass]
     public class UnbufferedChanTests

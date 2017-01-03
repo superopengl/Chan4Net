@@ -3,10 +3,10 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
-using Chan;
+using Chan4Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace ChanTests
+namespace Chan4Net.Tests
 {
     [TestClass]
     public class ChanVsBlockingCollectionPerformanceTests
