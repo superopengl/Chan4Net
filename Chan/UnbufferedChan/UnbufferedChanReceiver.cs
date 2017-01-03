@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 
-namespace Chan
+namespace Chan.UnbufferedChan
 {
     internal class UnbufferedChanReceiver<T> : IDisposable
     {

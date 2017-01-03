@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Chan;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Chan.BufferedChan;
 
 namespace ChanTests
 {

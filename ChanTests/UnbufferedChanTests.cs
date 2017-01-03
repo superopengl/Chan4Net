@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Chan;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Chan.UnbufferedChan;
 
 namespace ChanTests
 {

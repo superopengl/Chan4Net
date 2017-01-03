@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Chan
+namespace Chan.Helpers
 {
     internal class ChanYieldEnumerator<T> : IEnumerator<T>
     {

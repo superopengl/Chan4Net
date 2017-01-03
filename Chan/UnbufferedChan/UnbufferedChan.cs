@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Chan.Helpers;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Chan
+namespace Chan.UnbufferedChan
 {
-    public class UnbufferedChan<T> : IChan<T>
+    internal class UnbufferedChan<T> : IChan<T>
     {
         private readonly ConcurrentQueue<UnbufferedChanReceiver<T>> _receivers;
 
@@ -28,7 +29,7 @@ namespace Chan
 
         public void Send(T item, CancellationToken cancellationToken)
         {
-            AssertNotClosed();
+            ChanUtility.AssertChanNotClosed(this);
             if (cancellationToken.IsCancellationRequested)
                 throw new OperationCanceledException(cancellationToken);
             UnbufferedChanReceiver<T> receiver;
@@ -46,7 +47,8 @@ namespace Chan
         {
             if (cancellationToken.IsCancellationRequested)
                 throw new OperationCanceledException(cancellationToken);
-            AssertNotClosed();
+
+            ChanUtility.AssertChanNotClosed(this);
 
             using (var receiver = new UnbufferedChanReceiver<T>())
             {
@@ -67,11 +69,6 @@ namespace Chan
             {
                 yield return enumerator.Current;
             }
-        }
-
-        private void AssertNotClosed()
-        {
-            if (IsClosed) throw new InvalidOperationException("The chan has been closed");
         }
     }
 }

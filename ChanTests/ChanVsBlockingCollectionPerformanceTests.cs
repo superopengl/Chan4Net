@@ -41,7 +41,7 @@ namespace ChanTests
 
         private void OneProducer_OneConsumer_Chan(int capacity, int itemCount)
         {
-            var chan = new BufferedChan<int>(capacity);
+            var chan = new Chan<int>(capacity);
             var producer = Task.Run(() =>
             {
                 foreach (var i in Enumerable.Range(0, itemCount))
