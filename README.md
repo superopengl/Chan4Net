@@ -5,66 +5,69 @@ Inspired by the concept of the `chan` in Golang/Go. This is an C# implementation
 
 ### Create a chan of a type.
 ```csharp
-var size = 2;
-var chan = new Chan<int>(size); // Size must be >= 1
+// A buffered chan
+var bufferedChan = new Chan<int>(2); // Size must be >= 1 for a buffered channel.
+
+// A unbuffered chan
+var unbufferedChan = new Chan<int>();
 ```
 
-### `Add()` item
+### `Send()` item
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1);
-chan.Add(2);
-chan.Add(3); // Will block the current thread because the channel is full
+chan.Send(1);
+chan.Send(2);
+chan.Send(3); // Will block the current thread because the channel is full
 ```
 
-### `Take()` item
+### `Receive()` item
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1);
-chan.Add(2);
+chan.Send(1);
+chan.Send(2);
 
-var a = chan.Take(); // a == 1
-var b = chan.Take(); // b == 2
-var c = chan.Take(); // Will block the current thread because the channel is empty.
+var a = chan.Receive(); // a == 1
+var b = chan.Receive(); // b == 2
+var c = chan.Receive(); // Will block the current thread because the channel is empty.
 ```
 
 ### `Yield()` items
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1);
-chan.Add(2);
+chan.Send(1);
+chan.Send(2);
 
 foreach(var item in chan.Yield()) {
     Console.WriteLine(item);  // Outputs 1, 2 and then block and wait, because the channel is empty.
 }
 
-Console.WriteLine("Will never go to this line");
+Console.WriteLine("Will never come to this line");
 ```
 
 ### `Close()` channel
-Adding item to a closed channel will throw exception.
+Sending item to a closed channel will throw exception.
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1);
+chan.Send(1);
 chan.Close();
 
-chan.Add(2);  // Here throws InvalidOperationException, because it cannot add item into a closed channel.
+chan.Send(2);  // Here throws InvalidOperationException, because one cannot send item into a closed channel.
 ```
-Taking item from a closed AND empty channel will throw exception. But it's still fine to take item from a closed channel if it isn't empty.
+Taking item from a closed AND empty channel will throw exception. But it's still fine to Receive item from a closed channel if it isn't empty.
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1)
+chan.Send(1)
 chan.Close();
 
-var a = chan.Take(); // a == 1
-var b = chan.Take(); // Here throws InvalidOperationException.
+var a = chan.Receive(); // a == 1
+var b = chan.Receive(); // Here throws InvalidOperationException because no more item in the closed channel.
 ```
 
 Calling `Close()` will release the blocking `Yield()`.
 ```csharp
 var chan = new Chan<int>(2);
-chan.Add(1);
-chan.Add(2);
+chan.Send(1);
+chan.Send(2);
 chan.Close();
 
 foreach(var item in chan.Yield()) {
@@ -77,22 +80,22 @@ Console.WriteLine("Done");   // Outputs "Done"
 Please read below code a psuedo code in C#. Some infinite loop and thread sleeping doesn't make sense in reality.
 ### `Chan` as infinite message queue - slow producer and fast consumer
 ```csharp
-var chan = new Chan<DateTime>(2);
+var chan = new Chan<int>(2);
 
 var producer = Task.Run(() => {
     while(true) {
         Thread.Sleep(1000);
-        chan.Add(DateTime.Now);   // Add an item every second for ever.
+        chan.Send(SomeRandomInt());   // Send an item every second.
     }
 });
 
 var consumer = Task.Run(() => {
     foreach(var item in chan.Yield()) {
-        Console.WriteLine(item);  // Outputs an item once it exists in channel for every.
+        Console.WriteLine(item);  // Outputs an item once it exists in channel.
     }
 });
 
-Task.WaitAll(producer, consumer);
+Task.WaitAll(producer, consumer);  // Wait for ever because the channel is never closed.
 ```
 
 ### `Chan` as buffer/pipeline - fast producer and slow consumer
@@ -100,11 +103,11 @@ Task.WaitAll(producer, consumer);
 var chan = new Chan<int>(2);
 
 var producer = Task.Run(() => {
-    chan.Add(1);
-    chan.Add(2);
-    chan.Add(3);
-    chan.Add(4);
-    chan.Add(5);
+    chan.Send(1);
+    chan.Send(2);
+    chan.Send(3);
+    chan.Send(4);
+    chan.Send(5);
     chan.Close();
 });
 
@@ -126,7 +129,7 @@ var chan = new Chan<int>(2);
 var boss = Task.Run(() => {
     while(true) {
         // Create works here
-        chan.Add(0);
+        chan.Send(0);
     }
 });
 
@@ -146,21 +149,21 @@ var worker2 = Task.Run(() => {
 
 Task.WaitAll(boss, worker1, worker2);
 ```
-### `Chan` as Pub/Sub - multiple producers and multiple consumers
+### `Chan` as Pub/Sub - multiple producers and multiple subscribers
 ```csharp
 var chan = new Chan<int>(2);
 
 var publisher1 = Task.Run(() => {
     while(true) {
         // Create works here
-        chan.Add(1);
+        chan.Send(1);
     }
 });
 
 var publisher2 = Task.Run(() => {
     while(true) {
         // Create works here
-        chan.Add(2);
+        chan.Send(2);
     }
 });
 
@@ -169,7 +172,7 @@ var subscriber1 = Task.Run(() => {
         if(num == 1) {
             // Does something.
         } else {
-            chan.Add(num); // Add back to channel
+            chan.Send(num); // Send back to channel
         }
     }
 });
@@ -179,7 +182,7 @@ var subscriber2 = Task.Run(() => {
         if(num == 2) {
             // Does something.
         } else {
-            chan.Add(num); // Add back to channel
+            chan.Send(num); // Send back to channel
         }      
     }
 });
