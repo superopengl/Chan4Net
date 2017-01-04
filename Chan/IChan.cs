@@ -7,7 +7,7 @@ namespace Chan4Net
     ///     Golang chan like implementation.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public interface IChan<T>
+    internal interface IChan<T>
     {
         /// <summary>
         ///     Returns if the channel has been closed. You cannot continue adding item into a closed channel.
