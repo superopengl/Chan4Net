@@ -10,28 +10,28 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace ChanTests
 {
     [TestClass]
-    public class ChanTests
+    public class BufferedChanTests
     {
-        private readonly TimeSpan _awaitTimeout = TimeSpan.FromMilliseconds(100);
-        private readonly TimeSpan _slowActionLetency = TimeSpan.FromMilliseconds(50);
+        private readonly TimeSpan _awaitTimeout = TimeSpan.FromMilliseconds(1000);
+        private readonly TimeSpan _slowActionLetency = TimeSpan.FromMilliseconds(500);
 
         [TestMethod]
         [ExpectedException(typeof (ArgumentOutOfRangeException))]
         public void Ctor_ChanSizeZero_ShouldThrow()
         {
-            var sut = new Chan<int>(0);
+            var sut = new BufferedChan<int>(0);
         }
 
         [TestMethod]
         public void Send_LessThanSize_SendShouldNotBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var called = false;
 
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
+                sut.Send(1);
+                sut.Send(2);
                 called = true;
             });
 
@@ -44,14 +44,14 @@ namespace ChanTests
         [TestMethod]
         public void Send_AfterClosed_ShouldThrow()
         {
-            var sut = new Chan<int>(2);
-            sut.Add(1);
+            var sut = new BufferedChan<int>(2);
+            sut.Send(1);
             sut.Close();
 
             Exception exception = null;
             try
             {
-                sut.Add(2);
+                sut.Send(2);
             }
             catch (Exception ex)
             {
@@ -66,13 +66,13 @@ namespace ChanTests
         [TestMethod]
         public void Send_MoreThanSize_SendShouldBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var called = false;
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
                 called = true;
             });
 
@@ -83,23 +83,23 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void SendMany_TakeFew_SendShouldBeBlocked()
+        public void SendMany_ReceiveFew_SendShouldBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             bool? called = null;
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
-                sut.Add(4);
-                sut.Add(5);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
+                sut.Send(4);
+                sut.Send(5);
                 called = false;
-                sut.Add(6);
+                sut.Send(6);
                 called = true;
             });
 
-            var items = new List<int> {sut.Take(), sut.Take(), sut.Take()};
+            var items = new List<int> {sut.Receive(), sut.Receive(), sut.Receive()};
 
             producer.Wait(_awaitTimeout);
 
@@ -111,16 +111,16 @@ namespace ChanTests
         [TestMethod]
         public void Send_CancellationToken_ShouldThrow()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             Exception exception = null;
             var cts = new CancellationTokenSource();
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
+                sut.Send(1);
+                sut.Send(2);
                 try
                 {
-                    sut.Add(3, cts.Token);
+                    sut.Send(3, cts.Token);
                 }
                 catch (Exception ex)
                 {
@@ -137,20 +137,20 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void SendFew_TakeMany_TakeShouldBeBlocked()
+        public void SendFew_ReceiveMany_ReceiveShouldBeBlocked()
         {
-            var sut = new Chan<int>(2);
-            sut.Add(1);
-            sut.Add(2);
+            var sut = new BufferedChan<int>(2);
+            sut.Send(1);
+            sut.Send(2);
 
             bool? called = null;
             var items = new List<int>();
             var consumer = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 called = false;
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
                 called = true;
             });
 
@@ -162,13 +162,13 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void Take_FromEmptyChan_TakeShouldBeBlocked()
+        public void Receive_FromEmptyChan_ReceiveShouldBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var called = false;
             var producer = Task.Run(() =>
             {
-                var item = sut.Take();
+                var item = sut.Receive();
                 called = true;
             });
 
@@ -179,16 +179,16 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void Take_CancellationToken_ShouldThrow()
+        public void Receive_CancellationToken_ShouldThrow()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var cts = new CancellationTokenSource();
             Exception exception = null;
             var consumer = Task.Run(() =>
             {
                 try
                 {
-                    sut.Take(cts.Token);
+                    sut.Receive(cts.Token);
                 }
                 catch (Exception ex)
                 {
@@ -204,14 +204,14 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void Take_FromEmptyChanAfterClosed_ShouldThrow()
+        public void Receive_FromEmptyChanAfterClosed_ShouldThrow()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             sut.Close();
             Exception exception = null;
             try
             {
-                sut.Take();
+                sut.Receive();
             }
             catch (Exception ex)
             {
@@ -224,14 +224,14 @@ namespace ChanTests
         }
 
         [TestMethod]
-        public void Take_FromNonEmptyChan_ShouldNotBeBlocked()
+        public void Receive_FromNonEmptyChan_ShouldNotBeBlocked()
         {
-            var sut = new Chan<int>(2);
-            sut.Add(1);
-            sut.Add(2);
+            var sut = new BufferedChan<int>(2);
+            sut.Send(1);
+            sut.Send(2);
 
-            var item1 = sut.Take();
-            var item2 = sut.Take();
+            var item1 = sut.Receive();
+            var item2 = sut.Receive();
 
             Assert.AreEqual(0, sut.Count);
             Assert.AreEqual(1, item1);
@@ -241,12 +241,12 @@ namespace ChanTests
         [TestMethod]
         public void Yield_NotClosedChan_ShouldBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
             });
 
             var items = new List<int>();
@@ -270,12 +270,12 @@ namespace ChanTests
         [TestMethod]
         public void Yield_ClosedChan_ShouldNotBeBlocked()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
             });
 
             var items = new List<int>();
@@ -300,14 +300,14 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_MoreThanChanSize()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producerCalled = false;
             var totalItemCount = 100;
             var producer = Task.Run(() =>
             {
                 for (var i = 1; i <= totalItemCount; i++)
                 {
-                    sut.Add(i);
+                    sut.Send(i);
                 }
                 producerCalled = true;
             });
@@ -318,7 +318,7 @@ namespace ChanTests
             {
                 for (var i = 1; i <= totalItemCount; i++)
                 {
-                    items.Add(sut.Take());
+                    items.Add(sut.Receive());
                 }
                 consumerCalled = true;
             });
@@ -334,16 +334,16 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_SlowProducer_FastConsumer()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producerCalled = false;
             var producer = Task.Run(async () =>
             {
                 await Task.Delay(_slowActionLetency);
-                sut.Add(1);
+                sut.Send(1);
                 await Task.Delay(_slowActionLetency);
-                sut.Add(2);
+                sut.Send(2);
                 await Task.Delay(_slowActionLetency);
-                sut.Add(3);
+                sut.Send(3);
                 producerCalled = true;
             });
 
@@ -351,9 +351,9 @@ namespace ChanTests
             var items = new List<int>();
             var consumer = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumerCalled = true;
             });
 
@@ -368,13 +368,13 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_FastProducer_SlowConsumer()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producerCalled = false;
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
                 producerCalled = true;
             });
 
@@ -383,11 +383,11 @@ namespace ChanTests
             var consumer = Task.Run(async () =>
             {
                 await Task.Delay(_slowActionLetency);
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
                 await Task.Delay(_slowActionLetency);
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
                 await Task.Delay(_slowActionLetency);
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
                 consumerCalled = true;
             });
 
@@ -402,22 +402,22 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_MultipleProducers_MultipleConsumers()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producer1Called = false;
             var producer1 = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
                 producer1Called = true;
             });
 
             var producer2Called = false;
             var producer2 = Task.Run(() =>
             {
-                sut.Add(4);
-                sut.Add(5);
-                sut.Add(6);
+                sut.Send(4);
+                sut.Send(5);
+                sut.Send(6);
                 producer2Called = true;
             });
 
@@ -425,18 +425,18 @@ namespace ChanTests
             var consumer1Called = false;
             var consumer1 = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumer1Called = true;
             });
 
             var consumer2Called = false;
             var consumer2 = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumer2Called = true;
             });
 
@@ -453,16 +453,16 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_SingleProducer_MultipleConsumers()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producerCalled = false;
             var producer = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
-                sut.Add(4);
-                sut.Add(5);
-                sut.Add(6);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
+                sut.Send(4);
+                sut.Send(5);
+                sut.Send(6);
                 producerCalled = true;
             });
 
@@ -470,18 +470,18 @@ namespace ChanTests
             var consumer1Called = false;
             var consumer1 = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumer1Called = true;
             });
 
             var consumer2Called = false;
             var consumer2 = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumer2Called = true;
             });
 
@@ -497,22 +497,22 @@ namespace ChanTests
         [TestMethod]
         public void ProducerConsumer_MultipleProducers_SingleConsumer()
         {
-            var sut = new Chan<int>(2);
+            var sut = new BufferedChan<int>(2);
             var producer1Called = false;
             var producer1 = Task.Run(() =>
             {
-                sut.Add(1);
-                sut.Add(2);
-                sut.Add(3);
+                sut.Send(1);
+                sut.Send(2);
+                sut.Send(3);
                 producer1Called = true;
             });
 
             var producer2Called = false;
             var producer2 = Task.Run(() =>
             {
-                sut.Add(4);
-                sut.Add(5);
-                sut.Add(6);
+                sut.Send(4);
+                sut.Send(5);
+                sut.Send(6);
                 producer2Called = true;
             });
 
@@ -520,12 +520,12 @@ namespace ChanTests
             var consumerCalled = false;
             var consumer = Task.Run(() =>
             {
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
-                items.Add(sut.Take());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
+                items.Add(sut.Receive());
                 consumerCalled = true;
             });
 

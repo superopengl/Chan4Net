@@ -2,3 +2,4 @@
 TestResults
 bin
 obj
+*.DotSettings

@@ -50,8 +50,9 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="ChanTests.cs" />
+    <Compile Include="BufferedChanTests.cs" />
     <Compile Include="ChanVsBlockingCollectionPerformanceTests.cs" />
+    <Compile Include="UnbufferedChanTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

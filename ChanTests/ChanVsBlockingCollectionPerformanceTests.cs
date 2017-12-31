@@ -33,7 +33,7 @@ namespace ChanTests
         {
             Console.WriteLine("Buffer size: {0}, Total items: {1}, by running {2} times", capacity, itemCount,
                 repeatTimes);
-            new PerformanceCaseRepeatedRunner("Chan", repeatTimes,
+            new PerformanceCaseRepeatedRunner("BufferedChan", repeatTimes,
                 () => OneProducer_OneConsumer_Chan(capacity, itemCount)).Run();
             new PerformanceCaseRepeatedRunner("BlockingCollection", repeatTimes,
                 () => OneProducer_OneConsumer_BlockingCollection(capacity, itemCount)).Run();
@@ -41,12 +41,12 @@ namespace ChanTests
 
         private void OneProducer_OneConsumer_Chan(int capacity, int itemCount)
         {
-            var chan = new Chan<int>(capacity);
+            var chan = new BufferedChan<int>(capacity);
             var producer = Task.Run(() =>
             {
                 foreach (var i in Enumerable.Range(0, itemCount))
                 {
-                    chan.Add(i);
+                    chan.Send(i);
                 }
                 chan.Close();
             });

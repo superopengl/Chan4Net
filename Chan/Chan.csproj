@@ -38,7 +38,12 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BufferedChan.cs" />
     <Compile Include="Chan.cs" />
+    <Compile Include="ChanYieldEnumerator.cs" />
+    <Compile Include="IChan.cs" />
+    <Compile Include="UnbufferedChan.cs" />
+    <Compile Include="UnbufferedChanReceiver.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
